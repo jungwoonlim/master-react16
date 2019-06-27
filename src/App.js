@@ -1,75 +1,39 @@
-import React, { Component, Fragment } from "react";
-import { createPortal } from "react-dom";
+import React, { Component } from "react";
 
-const BoundaryHOC = ProtectedComponent =>
-  class Boundary extends Component {
-    state = {
-      hasError: false
-    };
-    componentDidCatch = () => {
-      this.setState({
-        hasError: true
-      });
-    };
-    render() {
-      const { hasError } = this.state;
-      if (hasError) {
-        return <ErrorFallback />;
-      } else {
-        return <ProtectedComponent />;
-      }
-    }
-  };
+const MAX_PIZZAS = 20;
 
-class ErrorMaker extends Component {
+const eatPizza = (state, props) => {
+  const { pizzas } = state;
+  if (pizzas < MAX_PIZZAS) {
+    return {
+      pizzas: pizzas + 1
+    };
+  } else {
+    return null;
+  }
+};
+
+class Controlled extends Component {
   state = {
-    frineds: ["L", "J", "W", "cloud"]
-  };
-  componentDidMount = () => {
-    setTimeout(() => {
-      this.setState({
-        frineds: undefined
-      });
-    }, 2000);
+    pizzas: 10
   };
   render() {
-    const { frineds } = this.state;
-    return frineds.map(frined => ` ${frined} `);
+    const { pizzas } = this.state;
+    return (
+      <button onClick={this._handleClick}>{`I have eaten ${pizzas} ${
+        pizzas === 1 ? "pizza" : "pizzas"
+      }`}</button>
+    );
   }
+  _handleClick = () => {
+    this.setState(eatPizza);
+  };
 }
-
-const PErrorMaker = BoundaryHOC(ErrorMaker);
-
-class Portals extends Component {
-  render() {
-    return createPortal(<Message />, document.getElementById("touchme"));
-  }
-}
-
-const PPortals = BoundaryHOC(Portals);
-
-const Message = () => "just touched it!";
-
-class ReturnTypes extends Component {
-  render() {
-    return "hello";
-  }
-}
-
-const PReturnTypes = BoundaryHOC(ReturnTypes);
-
-const ErrorFallback = () => "sry";
 
 class App extends Component {
   render() {
-    return (
-      <Fragment>
-        <PReturnTypes />
-        <PPortals />
-        <PErrorMaker />
-      </Fragment>
-    );
+    return <Controlled />;
   }
 }
 
-export default BoundaryHOC(App);
+export default App;
